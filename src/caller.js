@@ -32,13 +32,18 @@ export class LZTApiCaller {
 		
 		/* add queue and rate limits here? */
 		const resp = await fetch(url.href, options)
-		const json = await resp.json()
-		
-		if(json.errors)
-			throw new LZTApiError(json.errors)
-		if(json.error)
-			throw new LZTApiError(json.error_description || json.error)
-		
-		return json
+    const text = await resp.text()
+      try {
+          const json = JSON.parse(text)
+
+          if (json.errors)
+              throw new LZTApiError(json.errors)
+          if (json.error)
+              throw new LZTApiError(json.error_description || json.error)
+
+          return json
+      } catch (error) {
+          throw new LZTApiError(text)
+      }
 	}
 }
