@@ -5,7 +5,7 @@ export class LZTApiCaller {
 	constructor(options) {
 		this.options = options
 	}
-	
+
 	async call(method, path, params = {}) {
 		const url = new URL(path, this.options.endpoint)
 		const options = {
@@ -16,9 +16,9 @@ export class LZTApiCaller {
 				...this.options.fetchParams?.headers
 			}
 		}
-		
+
 		params.locale = params.locale || this.options.locale
-		
+
 		if(method === 'GET') {
 			for(const key of Object.keys(params))
 				if(params[key] !== undefined)
@@ -29,21 +29,24 @@ export class LZTApiCaller {
 				if(params[key] !== undefined)
 					options.body.set(key, params[key])
 		}
-		
+
 		/* add queue and rate limits here? */
-		const resp = await fetch(url.href, options)
-    const text = await resp.text()
-      try {
-          const json = JSON.parse(text)
+        const resp = await fetch(url.href, options)
+        const text = await resp.text()
+        let json
 
-          if (json.errors)
-              throw new LZTApiError(json.errors)
-          if (json.error)
-              throw new LZTApiError(json.error_description || json.error)
+        try {
+            json = await resp.json()
+        } catch (e) {
+            throw new LZTApiError(text)
+        }
 
-          return json
-      } catch (error) {
-          throw new LZTApiError(text)
-      }
+        if (json.errors)
+            throw new LZTApiError(json.errors)
+        if (json.error)
+            throw new LZTApiError(json.error_description || json.error)
+
+        return json
+
 	}
 }
