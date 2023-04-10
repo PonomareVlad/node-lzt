@@ -36,7 +36,7 @@ export class LZTApiCaller {
         let json
 
         try {
-            json = await resp.json()
+			json = JSON.parse(text)
         } catch (e) {
             throw new LZTApiError(text)
         }
